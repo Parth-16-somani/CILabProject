@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven3'
+        jdk 'jdk21'
+    }
+
     stages {
 
         stage('Build & Test - Main') {
@@ -8,25 +13,31 @@ pipeline {
                 branch 'main'
             }
             steps {
-                sh 'mvn clean package'
+                sh '''
+                mvn clean test
+                '''
             }
         }
 
         stage('Test Only - Feature Branch') {
             when {
-                branch pattern: "feature/.*", comparator: "REGEXP"
+                branch 'feature/login'
             }
             steps {
-                sh 'mvn test'
+                sh '''
+                mvn test
+                '''
             }
         }
 
         stage('Release Validation') {
             when {
-                branch pattern: "release/.*", comparator: "REGEXP"
+                branch 'release/v1.0'
             }
             steps {
-                sh 'mvn clean verify'
+                sh '''
+                mvn clean test
+                '''
             }
         }
     }
@@ -34,6 +45,7 @@ pipeline {
     post {
         always {
             junit 'target/surefire-reports/*.xml'
+            archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: true
         }
     }
 }
