@@ -3,44 +3,40 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('Info') {
             steps {
-                echo "Checking out source code"
-                checkout scm
+                echo "Branch Name: ${env.BRANCH_NAME}"
+                echo "Pipeline started successfully"
             }
         }
 
-        stage('Build') {
+        stage('Build - Main') {
             when {
                 branch 'main'
             }
             steps {
-                echo "Running full build for MAIN branch"
-                sh 'echo "Build successful for main branch"'
+                echo "Running full CI pipeline for MAIN branch"
             }
         }
 
-        stage('Test') {
+        stage('Test - Feature & Main') {
             when {
                 anyOf {
                     branch 'main'
                     branch pattern: "feature/.*", comparator: "REGEXP"
-                    branch pattern: "release/.*", comparator: "REGEXP"
                 }
             }
             steps {
                 echo "Running tests"
-                sh 'echo "All tests passed"'
             }
         }
 
-        stage('Security Scan') {
+        stage('Release Checks') {
             when {
                 branch pattern: "release/.*", comparator: "REGEXP"
             }
             steps {
-                echo "Running security scan for release branch"
-                sh 'echo "No vulnerabilities found"'
+                echo "Running release validation and security checks"
             }
         }
     }
